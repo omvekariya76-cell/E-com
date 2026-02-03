@@ -14,7 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # --- STRIPE CONFIGURATION (DEMO KEYS) ---
 # Replace these with your own keys from https://dashboard.stripe.com/test/apikeys
 app.config['STRIPE_PUBLIC_KEY'] = 'pk_test_51SwJE0CQlnqjfmn3YWsk8RsKA3ab95zDhOqKXjNf9bBchzOQiEqRe4jlsAUOXrVuZDJ5w9f4VRLK2mzDtH3GRZy300meuAenWg' 
-app.config['STRIPE_SECRET_KEY'] = "ENTER_KEY_HERE"
+app.config['STRIPE_SECRET_KEY'] = 'sk_test_51SwJE0CQlnqjfmn3FBFgw9IVewvEiaeTUsUfzxYojLmJ1XBJ886de9UX08P8hBSf1XaX2Vdh7JNs2wuKt5YSIIRY00FADoOAAR'
 stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
 db = SQLAlchemy(app)
