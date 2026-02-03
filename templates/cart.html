@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4 fw-bold">Your Shopping Cart</h2>
+        
+        {% if display_cart %}
+        <div class="card shadow-sm border-0">
+            <ul class="list-group list-group-flush">
+                {% for item in display_cart %}
+                <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                    <div class="d-flex align-items-center">
+                        {% if item.image_url %}
+                        <img src="{{ item.image_url }}" style="width: 50px; height: 50px; object-fit: cover;" class="rounded me-3">
+                        {% endif %}
+                        <span class="fw-bold">{{ item.name }}</span>
+                    </div>
+                    <span class="text-danger fw-bold">{{ item.price | inr }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="card-footer bg-white p-4">
+                <div class="d-flex justify-content-between mb-3">
+                    <h4 class="fw-bold">Total:</h4>
+                    <h4 class="text-success fw-bold">{{ total | inr }}</h4>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('clear_cart') }}" class="btn btn-outline-secondary">Clear Cart</a>
+                    
+                    <form action="{{ url_for('create_checkout_session') }}" method="POST">
+                        <button type="submit" class="btn btn-warning px-5 fw-bold rounded-pill">
+                            Proceed to Checkout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">Your cart is empty.</p>
+            <a href="/" class="btn btn-primary">Go Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
