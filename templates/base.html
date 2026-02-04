@@ -16,7 +16,6 @@
 
         body { background-color: #f3f3f3; font-family: 'Segoe UI', sans-serif; }
         
-        /* FIXED: Removed the space in ".navbar" below */
         .navbar { background-color: var(--amazon-dark) !important; padding: 0.5rem 1rem; }
         
         .navbar-brand { font-weight: bold; color: white !important; }
@@ -52,31 +51,43 @@
                 </form>
 
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('add_product') }}">
-                            <i class="bi bi-plus-circle me-1"></i>Add Product
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link position-relative" href="{{ url_for('view_cart') }}">
-                            <i class="bi bi-cart3 fs-5"></i>
-                            {% if session.get('cart') %}
-                            <span class="badge rounded-pill bg-danger cart-badge">
-                                {{ session['cart']|length }}
-                            </span>
-                            {% endif %}
-                            Cart
-                        </a>
-                    </li>
-
+                    
                     {% if current_user.is_authenticated %}
+                        
+                        {% if current_user.role == 'seller' %}
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-bold" href="{{ url_for('add_product') }}">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Product
+                                </a>
+                            </li>
+
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('my_orders') }}">
+                                    <i class="bi bi-box-seam me-1"></i> My Orders
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link position-relative" href="{{ url_for('view_cart') }}">
+                                    <i class="bi bi-cart3 fs-5"></i>
+                                    {% if session.get('cart') %}
+                                    <span class="badge rounded-pill bg-danger cart-badge">
+                                        {{ session['cart']|length }}
+                                    </span>
+                                    {% endif %}
+                                    Cart
+                                </a>
+                            </li>
+                        {% endif %}
+
                         <li class="nav-item">
-                            <span class="nav-link text-warning ms-3">Hi, {{ current_user.username }}</span>
+                            <span class="nav-link ms-3">Hi, {{ current_user.username }}</span>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link btn btn-outline-danger btn-sm ms-lg-2 px-3" href="{{ url_for('logout') }}">Logout</a>
                         </li>
+
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('login') }}">Login</a>
@@ -85,10 +96,24 @@
                             <a class="btn btn-warning btn-sm px-4 fw-bold text-dark" href="{{ url_for('register') }}">Sign Up</a>
                         </li>
                     {% endif %}
+                    
                 </ul>
             </div>
         </div>
     </nav>
+
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
     <div class="container py-4">
         {% block content %}{% endblock %}

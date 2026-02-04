@@ -1,13 +1,58 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-4 card p-4 shadow-sm mt-5">
-        <h3 class="text-center">Create Account</h3>
+        <h3 class="text-center mb-4">Create Account</h3>
+        
         <form method="POST">
-            <div class="mb-3"><label>Username</label><input type="text" name="username" class="form-control" required></div>
-            <div class="mb-3"><label>Password</label><input type="password" name="password" class="form-control" required></div>
-            <button class="btn btn-success w-100">Register</button>
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" name="password" id="regPass" class="form-control" required>
+                    
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('regPass', 'regIcon')">
+                        <i class="bi bi-eye" id="regIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Account Type</label>
+                <select name="role" class="form-control" required>
+                    <option value="buyer">I want to Buy Products</option>
+                    <option value="seller">I want to Sell Products</option>
+                </select>
+            </div>
+
+            <button class="btn btn-success w-100 mt-3">Register</button>
         </form>
+        
+        <div class="text-center mt-3">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+        </div>
     </div>
 </div>
+
+<script>
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+        }
+    }
+</script>
 {% endblock %}
