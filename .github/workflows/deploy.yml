@@ -13,9 +13,9 @@ jobs:
       - name: Pull latest code on PythonAnywhere
         run: |
           curl -s -X POST \
-            --data-urlencode "command=cd /home/ecommercetest/E-com && git pull origin main" \
             -H "Authorization: Token 8d8d9d2d1f59905bee45d383687831502c1763d4" \
-            https://www.pythonanywhere.com/api/v0/user/8d8d9d2d1f59905bee45d383687831502c1763d4/consoles/
+            --data-urlencode "command=cd /home/ecommercetest/E-com && git pull origin main" \
+            https://www.pythonanywhere.com/api/v0/user/ecommercetest/consoles/
 
       - name: Reload Web App
         run: |
