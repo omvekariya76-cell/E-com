@@ -13,12 +13,12 @@ jobs:
       - name: Pull latest code on PythonAnywhere
         run: |
           curl -s -X POST \
-            --data-urlencode "command=cd /home/${{ secrets.PA_USERNAME }}/E-com && git pull origin main" \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/
+            --data-urlencode "command=cd /home/ecommercetest/E-com && git pull origin main" \
+            -H "Authorization: Token 8d8d9d2d1f59905bee45d383687831502c1763d4" \
+            https://www.pythonanywhere.com/api/v0/user/8d8d9d2d1f59905bee45d383687831502c1763d4/consoles/
 
       - name: Reload Web App
         run: |
           curl -s -X POST \
-            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
-            https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/
+            -H "Authorization: Token 8d8d9d2d1f59905bee45d383687831502c1763d4" \
+            https://www.pythonanywhere.com/api/v0/user/ecommercetest/webapps/ecommercetest.pythonanywhere.com/reload/
