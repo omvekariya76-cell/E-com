@@ -1,5 +1,5 @@
 import locale
-import stripe  # type: ignore
+import stripe  
 from datetime import datetime 
 from collections import Counter
 from functools import wraps 
@@ -7,6 +7,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import request, jsonify
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_super_secret_key_123'
@@ -304,6 +305,189 @@ def success():
 def my_orders():
     orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.date_ordered.desc()).all()
     return render_template('my_orders.html', orders=orders)
+
+
+
+
+# _______________________
+"""
+Custom API Endpoint to add poroducts via api server rather then the html context.
+
+This help's when we want to schedule a auto upload as part of the testing, which saves time and effors and even check
+the load of the server and error possiablities. 
+
+This approach is currently setup for the temprory basisis, as the testing purpose, but can be fixed for
+getting better outcomes.
+
+"""
+@app.route('/api/admin/add', methods=['POST'])
+def api_add_product():
+    auth = request.authorization
+    
+    # Verify Basic Auth
+    if not auth or auth.username != 'Om' or auth.password != 'om':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    # Verify user is a seller
+    user = User.query.filter_by(username=auth.username).first()
+    if not user or user.role != 'seller':
+        return jsonify({'error': 'Seller access required'}), 403
+    
+    try:
+        name = request.form.get('name')
+        price = float(request.form.get('price'))
+        image = request.form.get('image_url')
+        desc = request.form.get('description')
+        
+        new_prod = Product(name=name, price=price, image_url=image, description=desc)
+        db.session.add(new_prod)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Product added successfully!',
+            'product_id': new_prod.id
+        }), 201
+    except ValueError:
+        return jsonify({'error': 'Invalid price. Please enter a number.'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+# Single product deletion endpoint
+@app.route('/api/admin/delete/<int:product_id>', methods=['DELETE'])
+def api_delete_product(product_id):
+    auth = request.authorization
+    
+    # Verify Basic Auth
+    if not auth or auth.username != 'Om' or auth.password != 'om':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    # Verify user is a seller
+    user = User.query.filter_by(username=auth.username).first()
+    if not user or user.role != 'seller':
+        return jsonify({'error': 'Seller access required'}), 403
+    
+    try:
+        product = Product.query.get_or_404(product_id)
+        db.session.delete(product)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Product deleted successfully!',
+            'product_id': product_id
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+
+# Delete all products endpoint (use with caution!)
+@app.route('/api/admin/delete_all', methods=['POST'])
+def api_delete_all():
+    auth = request.authorization
+    
+    # Verify Basic Auth
+    if not auth or auth.username != 'Om' or auth.password != 'om':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    # Verify user is a seller
+    user = User.query.filter_by(username=auth.username).first()
+    if not user or user.role != 'seller':
+        return jsonify({'error': 'Seller access required'}), 403
+    
+    try:
+        # Require confirmation token in request
+        data = request.get_json() or {}
+        confirmation = data.get('confirm')
+        
+        if confirmation != 'DELETE_ALL_PRODUCTS':
+            return jsonify({
+                'error': 'Confirmation required',
+                
+                'message': 'Send {"confirm": "DELETE_ALL_PRODUCTS"} to confirm deletion'
+            }), 400
+        
+        count = Product.query.count()
+        Product.query.delete()
+        db.session.commit()
+
+        return jsonify({
+            'message': f'All {count} products deleted successfully!',
+            'deleted_count': count
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+# Get all products (for listing)
+@app.route('/api/products', methods=['GET'])
+def api_get_products():
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 1000, type=int)
+        
+        pagination = Product.query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        products = [{
+            'id': p.id,
+            'name': p.name,
+            'price': p.price,
+            'image_url': p.image_url,
+            'description': p.description
+        } for p in pagination.items]
+        
+        return jsonify({
+            'products': products,
+            'total': pagination.total,
+            'page': page,
+            'per_page': per_page,
+            'pages': pagination.pages
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# Delete multiple products at once
+@app.route('/api/admin/delete_bulk', methods=['POST'])
+def api_delete_bulk():
+    auth = request.authorization
+    
+    if not auth or auth.username != 'Om' or auth.password != 'om':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    user = User.query.filter_by(username=auth.username).first()
+    if not user or user.role != 'seller':
+        return jsonify({'error': 'Seller access required'}), 403
+    
+    try:
+        data = request.get_json()
+        product_ids = data.get('product_ids', [])
+        
+        if not product_ids:
+            return jsonify({'error': 'No product IDs provided'}), 400
+        
+        deleted_count = 0
+        
+        for product_id in product_ids:
+            product = Product.query.get(product_id)
+            if product:
+                db.session.delete(product)
+                deleted_count += 1
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': f'Deleted {deleted_count} products',
+            'deleted_count': deleted_count
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 
 # --- 9. DATABASE INITIALIZATION ---
 
