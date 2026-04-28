@@ -11,7 +11,12 @@ from flask import request, jsonify
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_super_secret_key_123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shop.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shop.db'
+
+import os
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'shop.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # --- STRIPE CONFIGURATION ---

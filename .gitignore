@@ -1,0 +1,47 @@
+# SQLite Database
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.pyc
+
+# Virtual Environment
+venv/
+env/
+.env/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+.env.production
+
+# Flask
+instance/
+.webassets-cache
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Distribution / Packaging
+dist/
+build/
+*.egg-info/
